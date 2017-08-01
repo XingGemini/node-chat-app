@@ -1,5 +1,7 @@
 const path = require ('path');
+const http = require('http');
 const express = require ('express');
+const socketIO = require('socket.io');
 //const hbs = require('hbs');
 //const fs = require('fs');
 
@@ -7,6 +9,15 @@ const port = process.env.PORT || 3000;
 
 var app = express();
 
+var server = http.createServer(app);
+var io = socketIO(server);
+
+io.on('connect',  (socket) => {
+  console.log("new user connected");
+  socket.on ('disconnect', () => {
+    console.log('User was disconnected');
+  })
+})
 
 const publicPath = path.join(__dirname, '../public')
 app.use(express.static(publicPath)); //__dirname is the root folder of this script
@@ -67,7 +78,7 @@ app.get('/bad', (req, res)=> {
   });
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is up on port ${port}`);
 });
 
