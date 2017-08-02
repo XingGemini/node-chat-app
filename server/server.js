@@ -5,10 +5,11 @@ const socketIO = require('socket.io');
 //const hbs = require('hbs');
 //const fs = require('fs');
 
+const {generateMessage} = require('./utils/message');
+const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 
 var app = express();
-
 var server = http.createServer(app);
 var io = socketIO(server);
 
@@ -20,17 +21,9 @@ io.on('connect',  (socket) => {
   //   createdAt: 333
   // });
 
-  socket.emit ('newMessage', {
-    from: "Admin",
-    text: "Welcome to the chat app",
-    createdAt: new Date().getTime()
-  });
+  socket.emit ('newMessage', generateMessage('Admin', "Welcome to the chat app"));
 
-  socket.broadcast.emit ('newMessage', {
-    from: "Admin",
-    text: "New user joined",
-    createdAt: new Date().getTime()
-  });
+  socket.broadcast.emit ('newMessage', generateMessage('Admin', "New user joined"));
 
   socket.on ('createMessage', (message) => {
     console.log("create a new message", message);
@@ -52,7 +45,6 @@ io.on('connect',  (socket) => {
   })
 })
 
-const publicPath = path.join(__dirname, '../public')
 app.use(express.static(publicPath)); //__dirname is the root folder of this script
 
 
