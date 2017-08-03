@@ -37,11 +37,13 @@ socket.on('newGeolocationMessage', function(message) {
 jQuery('#message-form').on ('submit',function (e) {
   e.preventDefault();
 
+  var messageTextBox = jQuery('[name=message]');
+
   socket.emit('createMessage',  {
     from: 'User',
-    text: jQuery('[name=message]').val()
+    text: messageTextBox.val()
   }, function () {
-
+    messageTextBox.val('');
   });
 });
 
@@ -51,8 +53,11 @@ locationButton.on('click', function () {
     return alert ('Genolocation not supported by your browser.');
   }
 
+  locationButton.attr('disabled', 'disabled').text('Sending location ...');
+
   navigator.geolocation.getCurrentPosition(function (position) {
     //console.log(position);
+    locationButton.removeAttr('disabled').text('Send location');
     socket.emit ('createGeolocationMessage', {
       latitude: position.coords.latitude,
       longitude: position.coords.longitude
@@ -60,6 +65,7 @@ locationButton.on('click', function () {
   }, function (e) {
     //console.log(`ERROR(${e.code}): ${e.message}`);
     alert ('Unable to fetch location, a default cooridinates is used' + e);
+    locationButton.removeAttr('disabled').text('Send location');
     socket.emit ('createGeolocationMessage', {
       latitude: '37.432302',
       longitude: '-122.18713960000001'
