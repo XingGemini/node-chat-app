@@ -5,7 +5,7 @@ const socketIO = require('socket.io');
 //const hbs = require('hbs');
 //const fs = require('fs');
 
-const {generateMessage} = require('./utils/message');
+const {generateMessage, generateGeolocationMessage} = require('./utils/message');
 const publicPath = path.join(__dirname, '../public');
 const port = process.env.PORT || 3000;
 
@@ -29,17 +29,16 @@ io.on('connect',  (socket) => {
     console.log("create a new message", message);
     io.emit ('newMessage', generateMessage(message.from, message.text));
     callback('This is from the server.');
+  });
 
-    // socket.broadcast.emit ('newMessage', {
-    //   from: message.from,
-    //   text: message.text,
-    //   createdAt: new Date().getTime()
-    // });
+  socket.on ('createGeolocationMessage', (coords) => {
+    console.log(coords);
+    io.emit('newGeolocationMessage', generateGeolocationMessage('Admin', coords.latitude, coords.longitude));
   });
 
   socket.on ('disconnect', () => {
     console.log('User was disconnected');
-  })
+  });
 })
 
 app.use(express.static(publicPath)); //__dirname is the root folder of this script
