@@ -35,7 +35,7 @@ io.on('connect',  (socket) => {
     users.addUser (socket.id, params.name, params.room);
     io.to(params.room).emit ('updateUserList', users.getUserList(params.room));
 
-    socket.emit ('newMessage', generateMessage('Admin', "Welcome to the chat app"));
+    socket.emit ('newMessage', generateMessage('Admin', `${params.name}, Welcome to the chat app`));
 
     socket.broadcast.to(params.room).emit ('newMessage', generateMessage('Admin', `${params.name} is joined.`));
 
@@ -43,18 +43,22 @@ io.on('connect',  (socket) => {
   });
 
   socket.on ('createMessage', (message, callback) => {
-    console.log("create a new message", message);
-    io.emit ('newMessage', generateMessage(message.from, message.text));
+    //console.log("create a new message", message);
+    var user = users.getUser(socket.id);
+    if(user && isRealString(message.text)) {
+      io.to(user.room).emit ('newMessage', generateMessage(user.name, message.text));
+    }
     callback();
   });
 
   socket.on ('createGeolocationMessage', (coords) => {
-    console.log(coords);
-    io.emit('newGeolocationMessage', generateGeolocationMessage('Admin', coords.latitude, coords.longitude));
+    //console.log(coords);
+    var user = users.getUser(socket.id);
+    io.to(user.room).emit('newGeolocationMessage', generateGeolocationMessage(user.name, coords.latitude, coords.longitude));
   });
 
   socket.on ('disconnect', () => {
-    console.log('User was disconnected');
+    //console.log('User was disconnected');
 
     var user = users.removeUser(socket.id);
 
